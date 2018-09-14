@@ -41,6 +41,8 @@ const builder = new IconFontBuildr ({
     'public_domain'
   ],
   output: {
+    // codepoints: true, // Enable support for codepoints
+    // ligatures: false, // Disable support for ligatures
     // icons: path.join ( __dirname, 'builder-icons' ), // Where to save the icons, if not provided they won't be stored permanently
     fonts: path.join ( __dirname, 'builder-fonts' ), // Where to save the fonts
     fontName: 'MaterialDesign', // The name of the font to generate
@@ -55,7 +57,8 @@ const builder = new IconFontBuildr ({
 
 await builder.build ();
 
-const codepoints = await builder.getIconsCodepoints ( hex? ); // Get a map of icon names to codepoints, useful for generating CSS/SCSS etc.
+const codepoints = await builder.getIconsCodepoints ( hex? ); // Get a map of icon names to codepoints, useful for generating HTML/CSS/SCSS etc.
+const ligatures = await builder.getIconsLigatures (); // Get a map of icon names to ligatures, useful for generating HTML/CSS/SCSS etc.
 ```
 
 ## License

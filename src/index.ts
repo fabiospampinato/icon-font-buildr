@@ -22,8 +22,6 @@ temp.track ();
 
 /* ICON FONT BUILDR */
 
-//TODO: Add support for font ligatures
-
 class IconFontBuildr {
 
   /* VARIABLES */
@@ -47,6 +45,8 @@ class IconFontBuildr {
       sources: [],
       icons: [],
       output: {
+        codepoints: false,
+        ligatures: true,
         icons: undefined,
         fonts: path.join ( process.cwd (), 'icon_font' ),
         fontName: 'IconFont',
@@ -80,6 +80,8 @@ class IconFontBuildr {
     const formats = this.configDefault.output.formats;
 
     if ( !this.config.output.formats.length ) exit ( `You need to provide at least one format, supported formats: ${formats.map ( format => `"${chalk.bold ( format )}"` ).join ( ', ' )}` );
+
+    if ( !this.config.output.codepoints && !this.config.output.ligatures ) exit ( `Both "${chalk.bold ( 'output.codepoints' )}" and "${chalk.bold ( 'output.ligatures' )}" can't be "${chalk.bold ( 'false' )}"` );
 
     const formatUnsupported = this.config.output.formats.find ( format => !formats.includes ( format ) );
 
@@ -205,10 +207,11 @@ class IconFontBuildr {
 
       const name = path.basename ( filePath, path.extname ( filePath ) ),
             codepoint = String.fromCharCode ( codepointStart.charCodeAt ( 0 ) + index ),
-            codepointHex = codepoint.charCodeAt ( 0 ).toString ( 16 );
+            codepointHex = codepoint.charCodeAt ( 0 ).toString ( 16 ),
+            ligature = name.replace ( /-/g, '_' ); // Hyphens aren't supported
 
-      icons[filePath] = { filePath, name, codepoint, codepointHex };
-
+      icons[filePath] = { filePath, name, codepoint, codepointHex, ligature };
+ 
     });
 
     return icons;
@@ -223,6 +226,21 @@ class IconFontBuildr {
     return values.reduce ( ( acc, icon ) => {
 
       acc[icon.name] = hex ? icon.codepointHex : icon.codepoint;
+
+      return acc;
+
+    }, {} );
+
+  }
+
+  async getIconsLigatures () {
+
+    const icons = await this.getIcons (),
+          values = Object.values ( icons ) as any[]; //TSC
+
+    return values.reduce ( ( acc, icon ) => {
+
+      acc[icon.name] = icon.ligature;
 
       return acc;
 
@@ -265,10 +283,14 @@ class IconFontBuildr {
 
     Object.values ( icons ).forEach ( ( icon: any ) => { //TSC
 
-      const glyph: any = fs.createReadStream ( icon.filePath ); //TSC
+      const glyph: any = fs.createReadStream ( icon.filePath ), //TSC
+            unicode: string[] = [];
+
+      if ( this.config.output.codepoints ) unicode.push ( icon.codepoint );
+      if ( this.config.output.ligatures ) unicode.push ( icon.ligature );
 
       glyph.metadata = {
-        unicode: [icon.codepoint],
+        unicode,
         name: icon.name
       };
 
