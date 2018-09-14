@@ -1,0 +1,76 @@
+{
+  "name": "icon-font-buildr",
+  "description": "Build custom icon fonts, it supports remote and local icons sources.",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "bin": "dist/bin.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean:dist": "rimraf dist",
+    "clean:coverage": "rimraf coverage .nyc_output",
+    "clean": "npm run clean:dist && npm run clean:coverage",
+    "compile": "tsc --skipLibCheck",
+    "compile:watch": "tsc --skipLibCheck --watch",
+    "lint": "tslint \"src/**/*.ts*\" --force",
+    "test": "ava",
+    "test:watch": "ava --watch",
+    "coverage": "nyc --reporter=html ava",
+    "report": "nyc report",
+    "report:html": "open coverage/index.html",
+    "prepublish": "npm run clean && npm run lint && npm run compile && npm run coverage"
+  },
+  "ava": {
+    "files": [
+      "test/index.js"
+    ]
+  },
+  "bugs": {
+    "url": "https://github.com/fabiospampinato/icon-font-buildr/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Fabio Spampinato",
+    "email": "spampinabio@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fabiospampinato/icon-font-buildr.git"
+  },
+  "keywords": [
+    "font",
+    "icon",
+    "builder",
+    "generator",
+    "cli"
+  ],
+  "dependencies": {
+    "@types/node": "^10.9.4",
+    "chalk": "^2.4.1",
+    "del": "^3.0.0",
+    "execa": "^1.0.0",
+    "globby": "^8.0.1",
+    "got": "^9.2.1",
+    "is-url": "^1.2.4",
+    "lodash": "^4.17.11",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "require-dot-file": "^0.4.0",
+    "svg2ttf": "^4.1.0",
+    "svgicons2svgfont": "^9.0.3",
+    "temp": "^0.8.3",
+    "ttf2eot": "^2.0.0",
+    "ttf2woff": "^2.0.1",
+    "ttf2woff2": "^2.0.3"
+  },
+  "devDependencies": {
+    "ava": "^0.18.2",
+    "ava-spec": "^1.1.0",
+    "nyc": "^10.1.2",
+    "rimraf": "^2.6.0",
+    "tslint": "^4.4.2",
+    "typescript": "~3.0.3"
+  },
+  "engines": {
+    "node": ">=5.2.0"
+  }
+}
