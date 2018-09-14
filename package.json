@@ -45,6 +45,7 @@
   ],
   "dependencies": {
     "@types/node": "^10.9.4",
+    "caporal": "^0.7.0",
     "chalk": "^2.4.1",
     "del": "^3.0.0",
     "execa": "^1.0.0",
@@ -54,13 +55,15 @@
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
+    "read-pkg-up": "^4.0.0",
     "require-dot-file": "^0.4.0",
     "svg2ttf": "^4.1.0",
     "svgicons2svgfont": "^9.0.3",
     "temp": "^0.8.3",
     "ttf2eot": "^2.0.0",
     "ttf2woff": "^2.0.1",
-    "ttf2woff2": "^2.0.3"
+    "ttf2woff2": "^2.0.3",
+    "update-notifier": "^2.5.0"
   },
   "devDependencies": {
     "ava": "^0.18.2",
@@ -68,7 +71,7 @@
     "nyc": "^10.1.2",
     "rimraf": "^2.6.0",
     "tslint": "^4.4.2",
-    "typescript": "~3.0.3"
+    "typescript": "~2.5.2"
   },
   "engines": {
     "node": ">=5.2.0"
