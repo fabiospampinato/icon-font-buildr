@@ -13,7 +13,9 @@ npm install --save icon-font-buildr # If you want to use the API
 
 #### CLI
 
-//TODO: gif
+<p align="center">
+	<img src="resources/CLI.gif" width="850" alt="CLI">
+</p>
 
 ```sh
 icon-font-buildr --config my_icon_font.json
