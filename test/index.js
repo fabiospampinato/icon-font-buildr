@@ -27,16 +27,18 @@ describe ( 'Icon Font Buildr', it => {
         'public_domain'
       ],
       output: {
-        icons: path.join ( __dirname, 'builder-icons' ),
-        fonts: path.join ( __dirname, 'builder-fonts' ),
-        fontName: 'CustomFont'
+        codepoints: true,
+        ligatures: true,
+        icons: path.join ( __dirname, 'buildr-icons' ),
+        fonts: path.join ( __dirname, 'buildr-fonts' ),
+        fontName: 'IconFont'
       }
     });
 
     await builder.build ();
 
     t.true ( fs.existsSync ( path.join ( builder.config.output.icons, 'public_domain.svg' ) ) );
-    t.true ( fs.existsSync ( path.join ( builder.config.output.fonts, 'CustomFont.woff2' ) ) );
+    t.true ( fs.existsSync ( path.join ( builder.config.output.fonts, 'IconFont.woff2' ) ) );
 
     del.sync ( builder.config.output.icons );
     del.sync ( builder.config.output.fonts );

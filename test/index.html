@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Icon Font Buildr | Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+
+    <style>
+      @font-face {
+        font-family: IconFont;
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+        src: url(builder-fonts/IconFont.woff2) format('woff2');
+      }
+      i.icon {
+        display: inline-block;
+        vertical-align: middle;
+        font-family: IconFont;
+        font-weight: normal;
+        font-style: normal;
+        font-size: 1.5em;
+        width: 1.5em;
+        height: 1.5em;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        -moz-osx-font-smoothing: grayscale;
+        font-feature-settings: 'liga';
+      }
+    </style>
+
+    <h2>Codepoints</h2>
+
+    <i class="icon">&#xe000;</i>
+    <i class="icon">&#xe001;</i>
+    <i class="icon">&#xe002;</i>
+    <i class="icon">&#xe003;</i>
+    <i class="icon">&#xe004;</i>
+
+    <h2>Ligatures</h2>
+
+    <i class="icon">backup</i>
+    <i class="icon">bug_report</i>
+    <i class="icon">amazon</i>
+    <i class="icon">android_debug_bridge</i>
+    <i class="icon">public_domain</i>
+
+  </body>
+</html>
