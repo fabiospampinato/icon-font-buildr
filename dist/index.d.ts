@@ -12,6 +12,7 @@ declare class IconFontBuildr {
     downloadIconLocal(src: any, dst: any): boolean;
     getIcons(): Promise<{}>;
     getIconsCodepoints(hex?: boolean): Promise<any>;
+    getIconsLigatures(): Promise<any>;
     build(): Promise<void>;
     buildFontSVG(): Promise<void>;
     buildFontTTF(): Promise<void>;
