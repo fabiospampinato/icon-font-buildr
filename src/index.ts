@@ -348,4 +348,4 @@ class IconFontBuildr {
 
 /* EXPORT */
 
-export default IconFontBuildr;
+export = Object.assign ( IconFontBuildr, { default: IconFontBuildr } );
