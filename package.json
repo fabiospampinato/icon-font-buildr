@@ -43,6 +43,7 @@
     "cli"
   ],
   "dependencies": {
+    "@types/lodash": "^4.14.117",
     "@types/node": "^10.9.4",
     "caporal": "^0.7.0",
     "chalk": "^2.4.1",

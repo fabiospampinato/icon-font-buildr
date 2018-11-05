@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import * as _ from 'lodash';
+import isString = require ( 'lodash/isString' );
 import * as isUrl from 'is-url';
 import * as path from 'path';
 
@@ -9,7 +9,7 @@ import * as path from 'path';
 
 function makeAbs ( p ) {
 
-  if ( !_.isString ( p ) || isUrl ( p ) || path.isAbsolute ( p ) ) return p;
+  if ( !isString ( p ) || isUrl ( p ) || path.isAbsolute ( p ) ) return p;
 
   return path.resolve ( process.cwd (), p );
 

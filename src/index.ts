@@ -1,7 +1,8 @@
 
 /* IMPORT */
 
-import * as _ from 'lodash';
+import mergeWith = require ( 'lodash/mergeWith' );
+import isArray = require ( 'lodash/isArray' );
 import chalk from 'chalk';
 import * as del from 'del';
 import * as execa from 'execa';
@@ -59,7 +60,7 @@ class IconFontBuildr {
       }
     };
 
-    this.config = _.mergeWith ( {}, this.configDefault, config, ( prev, next ) => _.isArray ( next ) ? next : undefined );
+    this.config = mergeWith ( {}, this.configDefault, config, ( prev, next ) => isArray ( next ) ? next : undefined );
 
     this.config.sources = this.config.sources.map ( makeAbs );
     this.config.output.icons = makeAbs ( this.config.output.icons );
