@@ -1,7 +1,7 @@
 {
   "name": "icon-font-buildr",
   "description": "Build custom icon fonts, it supports remote and local icons sources.",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "main": "dist/index.js",
   "bin": "dist/bin.js",
   "types": "dist/index.d.ts",
