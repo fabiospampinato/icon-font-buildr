@@ -5,7 +5,7 @@ import chalk from 'chalk';
 
 /* EXIT */
 
-function exit ( message, code = 0 ) {
+function exit ( message, code = 1 ) {
 
   console.log ( chalk.red ( message ) );
 
