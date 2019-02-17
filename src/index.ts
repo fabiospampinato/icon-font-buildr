@@ -62,6 +62,17 @@ class IconFontBuildr {
 
     this.config = mergeWith ( {}, this.configDefault, config, ( prev, next ) => isArray ( next ) ? next : undefined );
 
+    this.config.icons = Object.keys(this.config.icons).reduce((obj, val) => {
+      const iconConfig = this.config.icons[val]
+      const key = iconConfig.src || iconConfig
+      obj[key] = {
+        src: key,
+        name: iconConfig.name || key,
+        codepoint: iconConfig.codepoint || undefined,
+        ligature: iconConfig.ligature || key.replace ( /-/g, '_' ) // Hyphens aren't supported
+      }
+      return obj
+    }, {})
     this.config.sources = this.config.sources.map ( makeAbs );
     this.config.output.icons = makeAbs ( this.config.output.icons );
     this.config.output.fonts = makeAbs ( this.config.output.fonts );
@@ -76,7 +87,7 @@ class IconFontBuildr {
 
     if ( sourceUntokenized ) exit ( `The "${chalk.bold ( sourceUntokenized )}" source doesn't include the "${chalk.bold ( '[icon]' )}" token` );
 
-    if ( !this.config.icons.length ) exit ( 'You need to provide at least one icon' );
+    if ( !Object.keys(this.config.icons).length ) exit ( 'You need to provide at least one icon' );
 
     const formats = this.configDefault.output.formats;
 
@@ -135,7 +146,7 @@ class IconFontBuildr {
 
     const downloaders = [this.downloadIconLocal.bind ( this ), this.downloadIconRemote.bind ( this )];
 
-    await Promise.all ( this.config.icons.map ( async icon => {
+    await Promise.all ( Object.keys(this.config.icons).map(key => this.config.icons[key].src || key).map ( async icon => {
 
       const dst = path.join ( this.paths.cache.icons, `${icon}.svg` );
 
@@ -202,14 +213,18 @@ class IconFontBuildr {
 
     const filePaths = ( await globby ( '*.svg', { cwd: this.paths.cache.icons, absolute: true } ) ).sort (), // Ensuring the order is fixed
           codepointStart = '\uE000', // Beginning of Unicode's private use area
-          icons = {};
+          icons = {}
+    let indexSkips = 0;
 
     filePaths.forEach ( ( filePath, index ) => {
-
-      const name = path.basename ( filePath, path.extname ( filePath ) ),
-            codepoint = String.fromCharCode ( codepointStart.charCodeAt ( 0 ) + index ),
+      const basename = path.basename ( filePath, path.extname ( filePath ) ),
+            iconConfig = this.config.icons[basename],
+            name = iconConfig.name || basename,
+            codepoint = iconConfig.codepoint || String.fromCharCode ( codepointStart.charCodeAt ( 0 ) + (index - indexSkips) ),
             codepointHex = codepoint.charCodeAt ( 0 ).toString ( 16 ),
-            ligature = name.replace ( /-/g, '_' ); // Hyphens aren't supported
+            ligature = iconConfig.ligature
+
+      if(iconConfig.codepoint) indexSkips++
 
       icons[filePath] = { filePath, name, codepoint, codepointHex, ligature };
  

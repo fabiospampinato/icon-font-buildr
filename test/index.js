@@ -23,7 +23,12 @@ describe ( 'Icon Font Buildr', it => {
         'backup',
         'bug_report',
         'amazon',
-        'android-debug-bridge',
+        {
+          src: 'android-debug-bridge',
+          name: 'my debug icon',
+          codepoint: '\E042',
+          ligature: 'DEBUG'
+        },
         'public_domain'
       ],
       output: {
