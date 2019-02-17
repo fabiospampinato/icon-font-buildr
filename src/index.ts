@@ -63,14 +63,16 @@ class IconFontBuildr {
     this.config = mergeWith ( {}, this.configDefault, config, ( prev, next ) => isArray ( next ) ? next : undefined );
 
     this.config.icons = Object.keys(this.config.icons).reduce((obj, val) => {
-      const iconConfig = this.config.icons[val]
-      const key = iconConfig.src || iconConfig
+      const iconConfig = this.config.icons[val],
+            key = iconConfig.icon || iconConfig
+
       obj[key] = {
-        src: key,
+        icon: key,
         name: iconConfig.name || key,
         codepoint: iconConfig.codepoint || undefined,
         ligature: iconConfig.ligature || key.replace ( /-/g, '_' ) // Hyphens aren't supported
       }
+
       return obj
     }, {})
     this.config.sources = this.config.sources.map ( makeAbs );
@@ -88,6 +90,8 @@ class IconFontBuildr {
     if ( sourceUntokenized ) exit ( `The "${chalk.bold ( sourceUntokenized )}" source doesn't include the "${chalk.bold ( '[icon]' )}" token` );
 
     if ( !Object.keys(this.config.icons).length ) exit ( 'You need to provide at least one icon' );
+
+    Object.keys(this.config.icons).map(key => this.config.icons[key]).reduce((array, value) => { if(array.indexOf(value.codepoint) !== -1) { exit ( `Codepage "${value.codepage}" was used multiple times (icon ${value.icon})!` ); } else { array.push(value); } return array }, []);
 
     const formats = this.configDefault.output.formats;
 
@@ -213,7 +217,9 @@ class IconFontBuildr {
 
     const filePaths = ( await globby ( '*.svg', { cwd: this.paths.cache.icons, absolute: true } ) ).sort (), // Ensuring the order is fixed
           codepointStart = '\uE000', // Beginning of Unicode's private use area
-          icons = {}
+          usedCodepoints: any = [],
+          icons = {};
+
     let indexSkips = 0;
 
     filePaths.forEach ( ( filePath, index ) => {
@@ -224,7 +230,11 @@ class IconFontBuildr {
             codepointHex = codepoint.charCodeAt ( 0 ).toString ( 16 ),
             ligature = iconConfig.ligature
 
-      if(iconConfig.codepoint) indexSkips++
+      if(usedCodepoints.indexOf(codepoint) !== -1) exit ( `Codepage "${codepoint}" was used multiple times (icon "${iconConfig.icon}")!` );
+
+      usedCodepoints.push(codepoint);
+
+      if(iconConfig.codepoint) indexSkips++;
 
       icons[filePath] = { filePath, name, codepoint, codepointHex, ligature };
  
