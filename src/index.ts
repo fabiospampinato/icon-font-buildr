@@ -62,28 +62,24 @@ class IconFontBuildr {
 
     this.config = mergeWith ( {}, this.configDefault, config, ( prev, next ) => isArray ( next ) ? next : undefined );
 
-    this.config.icons = Object.keys(this.config.icons).reduce((obj, val) => {
-        const iconConfig = this.config.icons[val],
+    this.config.icons = Object.keys(this.config.icons).reduce( ( obj, val ) => {
+        const iconConfig = this.config.icons [ val ],
               key = iconConfig.icon || iconConfig
 
-        obj[key] = {
-          icon: key,
-          name: iconConfig.name || key,
-          // default values:
-          codepoints: undefined,
-          ligatures: [ key.replace ( /-/g, '_' ) ] // Hyphens aren't supported
-        };
+        if( !obj [ key ] ) obj [ key ] = { glyphs: [] };
 
-        // deduplicating user input and filtering empty entries
-        if(iconConfig.codepoints && Array.isArray(iconConfig.codepoints) && iconConfig.codepoints.length) {
-          obj[key].codepoints = iconConfig.codepoints.filter((value, index, array) => (value && array.indexOf(value) === index));
+        let icon = {
+          name: iconConfig.name || key,
+          codepoint: iconConfig.codepoint,
+          ligature: iconConfig.ligature || key.replace ( /-/g, '_' ) // Hyphens aren't supported
         }
-        if(iconConfig.ligatures && Array.isArray(iconConfig.ligatures) && iconConfig.ligatures.length) {
-          obj[key].ligatures = iconConfig.ligatures.filter((value, index, array) => (value && array.indexOf(value) === index));
-        }
+
+        if ( typeof icon.codepoint === 'number' ) icon.codepoint = String.fromCharCode ( icon.codepoint );
+
+        obj[key].glyphs.push(icon);
 
         return obj
-    }, {})
+    }, {});
     this.config.sources = this.config.sources.map ( makeAbs );
     this.config.output.icons = makeAbs ( this.config.output.icons );
     this.config.output.fonts = makeAbs ( this.config.output.fonts );
@@ -100,22 +96,26 @@ class IconFontBuildr {
 
     if ( !Object.keys(this.config.icons).length ) exit ( 'You need to provide at least one icon' );
 
-    Object.keys(this.config.icons).map(key => this.config.icons[key]).reduce((checkObject, icon) => {
-      if(icon.codepoints) {
-        icon.codepoints.forEach(codepoint => {
-          if(checkObject.codepoints.indexOf(codepoint) !== -1) exit ( `Codepage "${codepoint}" was used multiple times (icon ${icon.icon})!` )
-          checkObject.codepoints.push(codepoint);
-        });
-        checkObject.codepoints.push(icon);
-      }
+    Object.keys ( this.config.icons ).map( key => this.config.icons [ key ] ).reduce( ( checkObject, icon ) => {
+      icon.glyphs.forEach( glyph => {
+        const { name, codepoint, ligature } = glyph;
 
-      icon.ligatures.forEach(ligature => {
-        if(checkObject.ligatures.indexOf(ligature) !== -1) exit ( `Ligature "${ligature}" was used multiple times (icon ${icon.icon})!` )
-        checkObject.ligatures.push(ligature);
+        if ( checkObject.names.indexOf( name ) !== -1 ) exit ( `Glyph name "${ name }" was defined multiple times!` );
+        checkObject.names.push ( name );
+
+        if ( this.config.output.codepoints && codepoint ) {
+          if ( checkObject.codepoints.indexOf( codepoint ) !== -1 ) exit ( `Codepoint "${ codepoint }" was defined multiple times (glyph "${ name }")!` );
+          checkObject.codepoints.push ( codepoint );
+        }
+
+        if ( this.config.output.ligatures && ligature ) {
+          if ( checkObject.ligatures.indexOf( ligature ) !== -1 ) exit ( `Ligature "${ ligature }" was defined multiple times (glyph "${ name }")!` );
+          checkObject.ligatures.push ( ligature );
+        }
       });
 
       return checkObject;
-    }, { codepoints: [], ligatures: [] });
+    }, { names: [], codepoints: [], ligatures: [] });
 
     const formats = this.configDefault.output.formats;
 
@@ -246,42 +246,27 @@ class IconFontBuildr {
 
     let codepointOffset = 0;
 
-    filePaths.forEach ( ( filePath, index ) => {
+    filePaths.forEach ( filePath => {
+      icons [ filePath ] = { filePath, glyphs: [] }
+
       const basename = path.basename ( filePath, path.extname ( filePath ) ),
-            iconConfig = this.config.icons[basename];
+            iconConfig = this.config.icons [ basename ];
 
-      let codepoints = iconConfig.codepoints
-      if(!codepoints) {
-        codepoints = [];
+      iconConfig.glyphs.forEach( glyph => {
+        let { codepoint } = glyph;
 
-        let codepoint;
-        do { // let's find a free codepoint here
-          codepoint = String.fromCharCode ( codepointStart + (codepointOffset++) )
-        } while (usedCodepoints.indexOf(codepoint) !== -1);
+        while ( !codepoint || usedCodepoints.indexOf ( codepoint ) !== -1 ) {
+          codepoint = String.fromCharCode ( codepointStart + ( codepointOffset++ ) )
+        }
 
         usedCodepoints.push(codepoint);
-        codepoints.push(codepoint);
-      }
+        const codepointHex = codepoint.charCodeAt ( 0 ).toString ( 16 );
 
-      let glyphOutputIndex = 0; // tmp
-      iconConfig.ligatures.forEach(ligature => { // we are guaranteed to have at least one
-        codepoints.forEach(codepoint => {
-          const codepointHex = codepoint.charCodeAt ( 0 ).toString ( 16 ),
-                name = `${iconConfig.name}-${glyphOutputIndex}`,
-                icon = Object.assign( iconConfig, { filePath, name: name, codepoint, codepointHex, ligature } );
-
-          delete icon.codepoints;
-          delete icon.ligatures;
-
-          icons[name] = icon;
-        });
+        icons [ filePath ].glyphs.push ( mergeWith ( glyph, { codepoint, codepointHex } ) );
       });
     });
 
-    console.log(icons)
-    console.log('####')
     return icons;
-
   }
 
   async getIconsCodepoints ( hex = false ) {
@@ -291,7 +276,9 @@ class IconFontBuildr {
 
     return values.reduce ( ( acc, icon ) => {
 
-      acc[icon.name] = hex ? icon.codepointHex : icon.codepoint;
+      icon.glyphs.forEach( glyph => {
+        acc[glyph.name] = hex ? glyph.codepointHex : glyph.codepoint;
+      });
 
       return acc;
 
@@ -306,7 +293,9 @@ class IconFontBuildr {
 
     return values.reduce ( ( acc, icon ) => {
 
-      acc[icon.name] = icon.ligature;
+      icon.glyphs.forEach( glyph => {
+        acc[glyph.name] = glyph.ligature;
+      });
 
       return acc;
 
@@ -337,6 +326,7 @@ class IconFontBuildr {
   async buildFontSVG () {
 
     const icons = await this.getIcons ();
+    console.dir(icons, { depth: null })
 
     const stream = new svg2font ({
       centerHorizontally: true,
@@ -347,21 +337,23 @@ class IconFontBuildr {
 
     stream.pipe ( fs.createWriteStream ( this.paths.cache.fontSVG ) );
 
-    Object.values ( icons ).forEach ( ( icon: any ) => { //TSC
+    Object.values ( icons ).forEach ( ( iconGlyphs: any ) => { //TSC
+      iconGlyphs.glyphs.forEach( glyphData => {
+        const glyph: any = fs.createReadStream ( iconGlyphs.filePath ), //TSC
+              unicode: string[] = [];
 
-      const glyph: any = fs.createReadStream ( icon.filePath ), //TSC
-            unicode: string[] = [];
+        if ( this.config.output.codepoints ) unicode.push ( glyphData.codepoint );
+        if ( this.config.output.ligatures ) unicode.push ( glyphData.ligature );
 
-      if ( this.config.output.codepoints ) unicode.push ( icon.codepoint );
-      if ( this.config.output.ligatures ) unicode.push ( icon.ligature );
+        glyph.metadata = {
+          unicode,
+          name: glyphData.name
+        };
+        console.log(glyph.metadata)
 
-      glyph.metadata = {
-        unicode,
-        name: icon.name
-      };
+        stream.write ( glyph );
 
-      stream.write ( glyph );
-
+      });
     });
 
     stream.end ();
