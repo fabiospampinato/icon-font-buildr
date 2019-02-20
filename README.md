@@ -37,8 +37,13 @@ const builder = new IconFontBuildr ({
     'backup',
     'bug_report',
     'amazon',
-    'android-debug-bridge',
-    'public_domain'
+    'public_domain',
+    { // optional form for advanced glyph configuration
+      icon: 'android-debug-bridge',
+      name: 'android debug icon',
+      codepoints: [ '\E042', '\E064' ],
+      ligatures: [ 'DEBUG', 'DEBUG2' ]
+    }
   ],
   output: {
     // codepoints: true, // Enable support for codepoints

@@ -29,7 +29,7 @@ describe ( 'Icon Font Buildr', it => {
         {
           icon: 'android-debug-bridge',
           name: 'my debug icon',
-          codepoints: [ '\E042', '\E000' ],
+          codepoints: [ '\E042', '\E064' ],
           ligatures: [ 'DEBUG', 'DEBUG2' ]
         },
         'public_domain'
