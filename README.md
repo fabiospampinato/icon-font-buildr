@@ -51,7 +51,8 @@ const builder = new IconFontBuildr ({
       'ttf',
       'woff',
       'woff2'
-    ]
+    ],
+    // logger: function(context, ...messages) {} // custom logging function 
   }
 });
 

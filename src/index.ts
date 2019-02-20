@@ -65,6 +65,7 @@ class IconFontBuildr {
     this.config.sources = this.config.sources.map ( makeAbs );
     this.config.output.icons = makeAbs ( this.config.output.icons );
     this.config.output.fonts = makeAbs ( this.config.output.fonts );
+    this.config.output.logger = typeof this.config.output.logger === 'function' ? this.config.output.logger : ( context, ...messages ) => console.log ( ...messages )
 
   }
 
@@ -172,7 +173,7 @@ class IconFontBuildr {
 
       fs.writeFileSync ( dst, body );
 
-      console.log ( `Downloaded "${chalk.bold ( src )}"` );
+      this.config.output.logger ( 'icon-font-buildr', `Downloaded "${chalk.bold ( src )}"` );
 
       return true;
 
@@ -190,7 +191,7 @@ class IconFontBuildr {
 
     copy ( src, dst );
 
-    console.log ( `Copied "${chalk.bold ( src )}"` );
+    this.config.output.logger ( 'icon-font-buildr', `Copied "${chalk.bold ( src )}"` );
 
     return true;
 
@@ -277,7 +278,8 @@ class IconFontBuildr {
       centerHorizontally: true,
       fontHeight: 4096,
       fontName: this.config.output.fontName,
-      normalize: true
+      normalize: true,
+      log: ( ...messages ) => { this.config.output.logger( 'svgicons2svgfont', ...messages ) }
     });
 
     stream.pipe ( fs.createWriteStream ( this.paths.cache.fontSVG ) );
