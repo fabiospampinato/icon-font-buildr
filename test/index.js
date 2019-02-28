@@ -6,6 +6,7 @@ import * as del from 'del';
 import * as fs from 'fs';
 import * as path from 'path';
 import IconFontBuildr from '../dist';
+import testURL from './test_url';
 
 /* ICON FONT BUILDER */
 
@@ -39,6 +40,10 @@ describe ( 'Icon Font Buildr', it => {
 
     t.true ( fs.existsSync ( path.join ( builder.config.output.icons, 'public_domain.svg' ) ) );
     t.true ( fs.existsSync ( path.join ( builder.config.output.fonts, 'IconFont.woff2' ) ) );
+
+    console.log ( 'Check if the page looks alright, close it to continue...' );
+
+    await testURL ( `file://${encodeURI ( __dirname )}/index.html` );
 
     del.sync ( builder.config.output.icons );
     del.sync ( builder.config.output.fonts );
