@@ -338,7 +338,8 @@ class IconFontBuildr {
       centerHorizontally: true,
       fontHeight: 4096,
       fontName: this.config.output.fontName,
-      normalize: true
+      normalize: true,
+      log: () => {}
     });
 
     stream.pipe ( fs.createWriteStream ( this.paths.cache.fontSVG ) );
