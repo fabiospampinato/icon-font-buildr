@@ -33,12 +33,17 @@ const builder = new IconFontBuildr ({
     'https://material.io/tools/icons/static/icons/baseline-[icon]-24px.svg',
     'https://raw.githubusercontent.com/Templarian/MaterialDesign/master/icons/svg/[icon].svg'
   ],
-  icons: [ // Name of the icons to download
+  icons: [ // Icons to download
     'backup',
     'bug_report',
     'amazon',
-    'android-debug-bridge',
-    'public_domain'
+    'public_domain',
+    { // Advanced way to define an icon
+      icon: 'android-debug-bridge',
+      name: 'android debug icon', // Custom icon name
+      codepoints: ['\ue042', '\ue064'], // Custom codepoints
+      ligatures: ['debug', 'debug_alt'] // Custom ligatures
+    }
   ],
   output: {
     // codepoints: true, // Enable support for codepoints
@@ -57,8 +62,8 @@ const builder = new IconFontBuildr ({
 
 await builder.build ();
 
-const codepoints = await builder.getIconsCodepoints ( hex? ); // Get a map of icon names to codepoints, useful for generating HTML/CSS/SCSS etc.
-const ligatures = await builder.getIconsLigatures (); // Get a map of icon names to ligatures, useful for generating HTML/CSS/SCSS etc.
+const codepoints = builder.getIconsCodepoints ( hex? ); // Get a map of icon names to codepoints, useful for generating HTML/CSS/SCSS etc.
+const ligatures = builder.getIconsLigatures (); // Get a map of icon names to ligatures, useful for generating HTML/CSS/SCSS etc.
 ```
 
 ## License

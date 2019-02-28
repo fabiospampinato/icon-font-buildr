@@ -1,13 +1,15 @@
 
 /* IMPORT */
 
-import mergeWith = require ( 'lodash/mergeWith' );
 import isArray = require ( 'lodash/isArray' );
+import isNumber = require ( 'lodash/isNumber' );
+import flatten = require ( 'lodash/flatten' );
+import mergeWith = require ( 'lodash/mergeWith' );
+import uniq = require ( 'lodash/uniq' );
 import chalk from 'chalk';
 import * as del from 'del';
 import * as execa from 'execa';
 import * as fs from 'fs';
-import * as globby from 'globby';
 import * as got from 'got';
 import * as isUrl from 'is-url';
 import * as mkdirp from 'mkdirp';
@@ -48,7 +50,7 @@ class IconFontBuildr {
       output: {
         codepoints: false,
         ligatures: true,
-        icons: undefined,
+        icons: [],
         fonts: path.join ( process.cwd (), 'icon_font' ),
         fontName: 'IconFont',
         formats: [
@@ -61,7 +63,7 @@ class IconFontBuildr {
     };
 
     this.config = mergeWith ( {}, this.configDefault, config, ( prev, next ) => isArray ( next ) ? next : undefined );
-
+    this.config.icons = this.getIcons ( this.config.icons );
     this.config.sources = this.config.sources.map ( makeAbs );
     this.config.output.icons = makeAbs ( this.config.output.icons );
     this.config.output.fonts = makeAbs ( this.config.output.fonts );
@@ -76,7 +78,21 @@ class IconFontBuildr {
 
     if ( sourceUntokenized ) exit ( `The "${chalk.bold ( sourceUntokenized )}" source doesn't include the "${chalk.bold ( '[icon]' )}" token` );
 
-    if ( !this.config.icons.length ) exit ( 'You need to provide at least one icon' );
+    const icons = Object.values ( this.config.icons ) as any; //TSC
+
+    if ( !icons.length ) exit ( 'You need to provide at least one icon' );
+
+    const names = icons.map ( icon => icon.name );
+
+    if ( names.length !== uniq ( names ).length ) exit ( 'There are duplicated names' );
+
+    const codepoints = flatten ( icons.map ( icon => icon.codepoints ) );
+
+    if ( codepoints.length !== uniq ( codepoints ).length ) exit ( 'There are duplicated codepoints' );
+
+    const ligatures = flatten ( icons.map ( icon => icon.ligatures ) );
+
+    if ( ligatures.length !== uniq ( ligatures ).length ) exit ( 'There are duplicated ligatures' );
 
     const formats = this.configDefault.output.formats;
 
@@ -135,9 +151,9 @@ class IconFontBuildr {
 
     const downloaders = [this.downloadIconLocal.bind ( this ), this.downloadIconRemote.bind ( this )];
 
-    await Promise.all ( this.config.icons.map ( async icon => {
+    await Promise.all ( Object.values ( this.config.icons ).map ( async ({ icon }) => {
 
-      const dst = path.join ( this.paths.cache.icons, `${icon}.svg` );
+      const dst = this.getIconPath ( icon );
 
       let downloaded = false;
 
@@ -162,7 +178,7 @@ class IconFontBuildr {
 
   }
 
-  async downloadIconRemote ( src, dst ) {
+  async downloadIconRemote ( src: string, dst: string ): Promise<boolean> {
 
     if ( !isUrl ( src ) ) return false;
 
@@ -184,7 +200,7 @@ class IconFontBuildr {
 
   }
 
-  downloadIconLocal ( src, dst ) {
+  async downloadIconLocal ( src: string, dst: string ): Promise<boolean> {
 
     if ( !fs.existsSync ( src ) ) return false;
 
@@ -198,35 +214,61 @@ class IconFontBuildr {
 
   /* ICONS */
 
-  async getIcons () {
+  getIcons ( arr ) {
 
-    const filePaths = ( await globby ( '*.svg', { cwd: this.paths.cache.icons, absolute: true } ) ).sort (), // Ensuring the order is fixed
-          codepointStart = '\uE000', // Beginning of Unicode's private use area
-          icons = {};
+    const icons = arr.reduce ( ( acc, val ) => {
 
-    filePaths.forEach ( ( filePath, index ) => {
+      const icon = val.icon || val,
+            name = val.name || icon,
+            codepoints = val.codepoints ? this.sanitizeIconCodepoints ( val.codepoints ) : [],
+            ligatures = val.ligatures ? this.sanitizeIconLigatures ( val.ligatures ) : [this.sanitizeIconLigature ( icon )];
 
-      const name = path.basename ( filePath, path.extname ( filePath ) ),
-            codepoint = String.fromCharCode ( codepointStart.charCodeAt ( 0 ) + index ),
-            codepointHex = codepoint.charCodeAt ( 0 ).toString ( 16 ),
-            ligature = name.replace ( /-/g, '_' ); // Hyphens aren't supported
+      acc[icon] = { icon, name, codepoints, ligatures };
 
-      icons[filePath] = { filePath, name, codepoint, codepointHex, ligature };
- 
+      return acc;
+
+    }, {} );
+
+    /* DEFAULT CODEPOINTS */
+
+    const codepointStart = '\uE000'.charCodeAt ( 0 ), // Beginning of Unicode's private use area
+          codepoints = flatten ( Object.values ( icons ).map ( ({ codepoints }) => codepoints ) );
+
+    let codepointOffset = 0;
+
+    Object.values ( icons ).forEach ( ( icon: any ) => { //TSC
+
+      if ( icon.codepoints.length ) return;
+
+      while ( true ) { // Finding a free codepoint
+
+        const codepoint = String.fromCharCode ( codepointStart + codepointOffset++ );
+
+        if ( codepoints.includes ( codepoint ) ) continue;
+
+        icon.codepoints = [codepoint];
+
+        break;
+
+      }
+
     });
 
     return icons;
 
   }
 
-  async getIconsCodepoints ( hex = false ) {
+  getIconPath ( icon: string ) {
 
-    const icons = await this.getIcons (),
-          values = Object.values ( icons ) as any[]; //TSC
+    return path.join ( this.paths.cache.icons, `${icon}.svg` );
 
-    return values.reduce ( ( acc, icon ) => {
+  }
 
-      acc[icon.name] = hex ? icon.codepointHex : icon.codepoint;
+  getIconsMap ( mapper: Function ): { [index: string]: any } {
+
+    return this.config.icons.reduce ( ( acc, icon ) => {
+
+      acc[icon.name] = mapper ( icon );
 
       return acc;
 
@@ -234,18 +276,39 @@ class IconFontBuildr {
 
   }
 
-  async getIconsLigatures () {
+  getIconsCodepoints ( hex: boolean = false ): { [index: string]: string[] } {
 
-    const icons = await this.getIcons (),
-          values = Object.values ( icons ) as any[]; //TSC
+    return this.getIconsMap ( icon => !hex ? icon.codepoints : icon.codepoints.map ( codepoint => codepoint.charCodeAt ( 0 ).toString ( 16 ) ) );
 
-    return values.reduce ( ( acc, icon ) => {
+  }
 
-      acc[icon.name] = icon.ligature;
+  getIconsLigatures (): { [index: string]: string[] } {
 
-      return acc;
+    return this.getIconsMap ( icon => icon.ligatures );
 
-    }, {} );
+  }
+
+  sanitizeIconCodepoint ( codepoint: number | string ): string {
+
+    return isNumber ( codepoint ) ? String.fromCodePoint ( codepoint ) : codepoint;
+
+  }
+
+  sanitizeIconCodepoints ( codepoints: ( number | string )[] ): string[] {
+
+    return uniq ( codepoints.map ( this.sanitizeIconCodepoint ) );
+
+  }
+
+  sanitizeIconLigature ( ligature: string ): string {
+
+    return ligature.replace ( /-/g, '_' ); // Hyphens aren't supported
+
+  }
+
+  sanitizeIconLigatures ( ligatures: string[] ): string[] {
+
+    return uniq ( ligatures.map ( this.sanitizeIconLigature ) );
 
   }
 
@@ -271,8 +334,6 @@ class IconFontBuildr {
 
   async buildFontSVG () {
 
-    const icons = await this.getIcons ();
-
     const stream = new svg2font ({
       centerHorizontally: true,
       fontHeight: 4096,
@@ -282,18 +343,16 @@ class IconFontBuildr {
 
     stream.pipe ( fs.createWriteStream ( this.paths.cache.fontSVG ) );
 
-    Object.values ( icons ).forEach ( ( icon: any ) => { //TSC
+    Object.values ( this.config.icons ).forEach ( ({ icon, name, codepoints, ligatures }) => {
 
-      const glyph: any = fs.createReadStream ( icon.filePath ), //TSC
+      const filePath = this.getIconPath ( icon ),
+            glyph = fs.createReadStream ( filePath ),
             unicode: string[] = [];
 
-      if ( this.config.output.codepoints ) unicode.push ( icon.codepoint );
-      if ( this.config.output.ligatures ) unicode.push ( icon.ligature );
+      if ( this.config.output.codepoints ) unicode.push ( ...codepoints );
+      if ( this.config.output.ligatures ) unicode.push ( ...ligatures );
 
-      glyph.metadata = {
-        unicode,
-        name: icon.name
-      };
+      glyph['metadata'] = { unicode, name };
 
       stream.write ( glyph );
 
@@ -305,19 +364,19 @@ class IconFontBuildr {
 
   async buildFontTTF () {
 
-    await execa ( 'npx', ['svg2ttf', this.paths.cache.fontSVG, this.paths.cache.fontTTF] );
+    return await execa ( 'npx', ['svg2ttf', this.paths.cache.fontSVG, this.paths.cache.fontTTF] );
 
   }
 
   async buildFontEOT () {
 
-    await execa ( 'npx', ['ttf2eot', this.paths.cache.fontTTF, this.paths.cache.fontEOT] );
+    return await execa ( 'npx', ['ttf2eot', this.paths.cache.fontTTF, this.paths.cache.fontEOT] );
 
   }
 
   async buildFontWOFF () {
 
-    await execa ( 'npx', ['ttf2woff', this.paths.cache.fontTTF, this.paths.cache.fontWOFF] );
+    return await execa ( 'npx', ['ttf2woff', this.paths.cache.fontTTF, this.paths.cache.fontWOFF] );
 
   }
 
