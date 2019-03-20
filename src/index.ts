@@ -333,34 +333,41 @@ class IconFontBuildr {
   }
 
   async buildFontSVG () {
+    return new Promise(((resolve, reject) => {
+      const stream = new svg2font ({
+        centerHorizontally: true,
+        fontHeight: 4096,
+        fontName: this.config.output.fontName,
+        normalize: true,
+        log: () => {}
+      });
 
-    const stream = new svg2font ({
-      centerHorizontally: true,
-      fontHeight: 4096,
-      fontName: this.config.output.fontName,
-      normalize: true,
-      log: () => {}
-    });
+      stream.pipe ( fs.createWriteStream ( this.paths.cache.fontSVG ) )
+        .on( 'finish',function() {
+          resolve();
+        })
+        .on( 'error',function( err ) {
+          reject( err );
+        });
 
-    stream.pipe ( fs.createWriteStream ( this.paths.cache.fontSVG ) );
+      Object.values ( this.config.icons ).forEach ( ({ icon, name, codepoints, ligatures }) => {
 
-    Object.values ( this.config.icons ).forEach ( ({ icon, name, codepoints, ligatures }) => {
+        const filePath = this.getIconPath ( icon ),
+              glyph = fs.createReadStream ( filePath ),
+              unicode: string[] = [];
 
-      const filePath = this.getIconPath ( icon ),
-            glyph = fs.createReadStream ( filePath ),
-            unicode: string[] = [];
+        if ( this.config.output.codepoints ) unicode.push ( ...codepoints );
+        if ( this.config.output.ligatures ) unicode.push ( ...ligatures );
 
-      if ( this.config.output.codepoints ) unicode.push ( ...codepoints );
-      if ( this.config.output.ligatures ) unicode.push ( ...ligatures );
+        glyph['metadata'] = { unicode, name };
 
-      glyph['metadata'] = { unicode, name };
+        stream.write ( glyph );
 
-      stream.write ( glyph );
+      });
 
-    });
+      stream.end ();
 
-    stream.end ();
-
+    }));
   }
 
   async buildFontTTF () {
