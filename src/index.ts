@@ -343,10 +343,10 @@ class IconFontBuildr {
       });
 
       stream.pipe ( fs.createWriteStream ( this.paths.cache.fontSVG ) )
-        .on( 'finish',function() {
+        .on( 'finish', function() {
           resolve();
         })
-        .on( 'error',function( err ) {
+        .on( 'error', function( err ) {
           reject( err );
         });
 
