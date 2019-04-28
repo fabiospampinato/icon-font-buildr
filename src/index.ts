@@ -51,7 +51,7 @@ class IconFontBuildr {
       output: {
         codepoints: false,
         ligatures: true,
-        icons: [],
+        icons: undefined,
         fonts: path.join ( process.cwd (), 'icon_font' ),
         fontName: 'IconFont',
         formats: [
@@ -66,7 +66,10 @@ class IconFontBuildr {
     this.config = mergeWith ( {}, this.configDefault, config, ( prev, next ) => isArray ( next ) ? next : undefined );
     this.config.icons = this.getIcons ( this.config.icons );
     this.config.sources = this.config.sources.map ( makeAbs );
-    this.config.output.icons = makeAbs ( this.config.output.icons );
+
+    if ( isString ( this.config.output.icons ) ) {
+      this.config.output.icons = makeAbs ( this.config.output.icons );
+    }
 
     if ( isString ( this.config.output.fonts ) ) {
       this.config.output.fonts = makeAbs ( this.config.output.fonts );
