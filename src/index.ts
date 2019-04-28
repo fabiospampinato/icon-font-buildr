@@ -275,13 +275,15 @@ class IconFontBuildr {
 
   getIconsMap ( mapper: Function ): { [index: string]: any } {
 
-    return this.config.icons.reduce ( ( acc, icon ) => {
+    const map = {};
 
-      acc[icon.name] = mapper ( icon );
+    for ( let icon in this.config.icons ) {
 
-      return acc;
+      map[icon] = mapper ( this.config.icons[icon] );
 
-    }, {} );
+    }
+
+    return map;
 
   }
 
