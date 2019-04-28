@@ -3,6 +3,7 @@
 
 import isArray = require ( 'lodash/isArray' );
 import isNumber = require ( 'lodash/isNumber' );
+import isString = require ( 'lodash/isString' );
 import flatten = require ( 'lodash/flatten' );
 import mergeWith = require ( 'lodash/mergeWith' );
 import uniq = require ( 'lodash/uniq' );
@@ -66,7 +67,10 @@ class IconFontBuildr {
     this.config.icons = this.getIcons ( this.config.icons );
     this.config.sources = this.config.sources.map ( makeAbs );
     this.config.output.icons = makeAbs ( this.config.output.icons );
-    this.config.output.fonts = makeAbs ( this.config.output.fonts );
+
+    if ( isString ( this.config.output.fonts ) ) {
+      this.config.output.fonts = makeAbs ( this.config.output.fonts );
+    }
 
   }
 
@@ -105,6 +109,8 @@ class IconFontBuildr {
     if ( formatUnsupported ) exit ( `The format "${chalk.bold ( formatUnsupported )}" is not supported, supported formats: ${formats.map ( format => `"${chalk.bold ( format )}"` ).join ( ', ' )}` );
 
     if ( !this.config.output.fontName ) exit ( 'You need to provide a valid font name' );
+
+    if ( !isString ( this.config.output.fonts ) ) exit ( 'You need to provide a valid value for the "output.fonts" configuration option' );
 
   }
 
