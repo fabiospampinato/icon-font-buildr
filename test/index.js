@@ -5,8 +5,8 @@ import {describe} from 'ava-spec';
 import * as del from 'del';
 import * as fs from 'fs';
 import * as path from 'path';
+import testURL from 'test-url';
 import IconFontBuildr from '../dist';
-import testURL from './test_url';
 
 /* ICON FONT BUILDER */
 

@@ -68,8 +68,8 @@
     "ava": "^0.18.2",
     "ava-spec": "^1.1.0",
     "nyc": "^10.1.2",
-    "puppeteer": "^1.12.2",
     "rimraf": "^2.6.0",
+    "test-url": "^1.0.0",
     "typescript": "~3.0.3",
     "typescript-transform-export-interop": "^1.0.1"
   },
