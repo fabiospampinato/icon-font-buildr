@@ -33,8 +33,10 @@ async function build () {
   const builder = new IconFontBuildr ({
     sources: [ // Where to get the icons, both remote and local sources are supported. `[icon]` will be replace with the name of your icon
       path.join ( __dirname, 'icons', '[icon].svg' ),
-      'https://material.io/tools/icons/static/icons/baseline-[icon]-24px.svg',
-      'https://raw.githubusercontent.com/Templarian/MaterialDesign/master/icons/svg/[icon].svg'
+      'https://fonts.gstatic.com/s/i/materialicons/[icon]/v5/24px.svg',
+      'https://fonts.gstatic.com/s/i/materialicons/[icon]/v4/24px.svg',
+      'https://fonts.gstatic.com/s/i/materialicons/[icon]/v3/24px.svg',
+      'https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/[icon].svg'
     ],
     icons: [ // Icons to use/download
       'backup',
