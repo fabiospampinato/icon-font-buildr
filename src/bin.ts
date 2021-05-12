@@ -2,7 +2,7 @@
 
 /* IMPORT */
 
-import rdf from 'require-dot-file';
+import findUp from 'find-up-json';
 import {program, updater} from 'specialist';
 import {description, name, version} from '../package.json';
 import IconFontBuildr from '.';
@@ -17,7 +17,7 @@ program
   .description ( description )
   .option ( '-c, --config <path>', 'Path to the config file' )
   .action ( options => {
-    const config = ( options.config && require ( options.config ) ) || rdf ( 'icon_font.json', process.cwd () ) || {};
+    const config = ( options.config && require ( options.config ) ) || findUp ( 'icon_font.json', process.cwd () )?.content || {};
     new IconFontBuildr ( config ).build ();
   });
 

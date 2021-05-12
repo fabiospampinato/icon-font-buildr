@@ -46,10 +46,10 @@
     "node": ">=12.12.0"
   },
   "dependencies": {
+    "find-up-json": "^1.0.0",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
-    "require-dot-file": "^0.4.0",
     "specialist": "0.1.0",
     "svg2ttf": "^5.2.0",
     "svgicons2svgfont": "^9.2.0",
@@ -69,6 +69,6 @@
     "rimraf": "^3.0.2",
     "test-url": "^1.0.0",
     "typescript": "~4.2.4",
-    "typescript-transform-export-interop": "^1.0.2"
+    "typescript-transform-export-interop": "^1.0.3"
   }
 }
