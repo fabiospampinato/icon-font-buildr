@@ -7,17 +7,15 @@ import isString = require ( 'lodash/isString' );
 import flatten = require ( 'lodash/flatten' );
 import mergeWith = require ( 'lodash/mergeWith' );
 import uniq = require ( 'lodash/uniq' );
-import chalk from 'chalk';
-import * as del from 'del';
-import * as execa from 'execa';
+import {spawnSync} from 'child_process';
 import * as fs from 'fs';
-import * as got from 'got';
-import * as isUrl from 'is-url';
-import * as mkdirp from 'mkdirp';
+import isUrl from 'is-url';
+import fetch from 'node-fetch';
 import * as path from 'path';
-import * as svg2font from 'svgicons2svgfont';
+import {color} from 'specialist';
+import svg2font from 'svgicons2svgfont';
 import * as temp from 'temp';
-import * as ttf2woff2 from 'ttf2woff2';
+import * as ttf2woff2 from 'wawoff2';
 import copy from './copy';
 import exit from './exit';
 import makeAbs from './make_abs';
@@ -83,7 +81,7 @@ class IconFontBuildr {
 
     const sourceUntokenized = this.config.sources.find ( source => !source.includes ( '[icon]' ) );
 
-    if ( sourceUntokenized ) exit ( `The "${chalk.bold ( sourceUntokenized )}" source doesn't include the "${chalk.bold ( '[icon]' )}" token` );
+    if ( sourceUntokenized ) exit ( `The "${color.bold ( sourceUntokenized )}" source doesn't include the "${color.bold ( '[icon]' )}" token` );
 
     const icons = Object.values ( this.config.icons ) as any; //TSC
 
@@ -103,13 +101,13 @@ class IconFontBuildr {
 
     const formats = this.configDefault.output.formats;
 
-    if ( !this.config.output.formats.length ) exit ( `You need to provide at least one format, supported formats: ${formats.map ( format => `"${chalk.bold ( format )}"` ).join ( ', ' )}` );
+    if ( !this.config.output.formats.length ) exit ( `You need to provide at least one format, supported formats: ${formats.map ( format => `"${color.bold ( format )}"` ).join ( ', ' )}` );
 
-    if ( !this.config.output.codepoints && !this.config.output.ligatures ) exit ( `Both "${chalk.bold ( 'output.codepoints' )}" and "${chalk.bold ( 'output.ligatures' )}" can't be "${chalk.bold ( 'false' )}"` );
+    if ( !this.config.output.codepoints && !this.config.output.ligatures ) exit ( `Both "${color.bold ( 'output.codepoints' )}" and "${color.bold ( 'output.ligatures' )}" can't be "${color.bold ( 'false' )}"` );
 
     const formatUnsupported = this.config.output.formats.find ( format => !formats.includes ( format ) );
 
-    if ( formatUnsupported ) exit ( `The format "${chalk.bold ( formatUnsupported )}" is not supported, supported formats: ${formats.map ( format => `"${chalk.bold ( format )}"` ).join ( ', ' )}` );
+    if ( formatUnsupported ) exit ( `The format "${color.bold ( formatUnsupported )}" is not supported, supported formats: ${formats.map ( format => `"${color.bold ( format )}"` ).join ( ', ' )}` );
 
     if ( !this.config.output.fontName ) exit ( 'You need to provide a valid font name' );
 
@@ -143,14 +141,14 @@ class IconFontBuildr {
       }
     };
 
-    mkdirp.sync ( this.paths.cache.icons );
-    mkdirp.sync ( fontsDir );
+    fs.mkdirSync ( this.paths.cache.icons, { recursive: true } );
+    fs.mkdirSync ( fontsDir, { recursive: true } );
 
   }
 
   pathsReset () {
 
-    del.sync ( this.paths.cache.root, { force: true } );
+    fs.rmdirSync ( this.paths.cache.root, { recursive: true } );
 
   }
 
@@ -181,7 +179,7 @@ class IconFontBuildr {
 
       }
 
-      if ( !downloaded ) exit ( `The "${chalk.bold ( icon )}" icon has not been found in any of the sources` );
+      if ( !downloaded ) exit ( `The "${color.bold ( icon )}" icon has not been found in any of the sources` );
 
     }));
 
@@ -193,11 +191,15 @@ class IconFontBuildr {
 
     try {
 
-      const {body} = await got ( src );
+      const response = await fetch ( src );
 
-      fs.writeFileSync ( dst, body );
+      if ( response.status !== 200 ) throw new Error ( 'Non-200 request' );
 
-      console.log ( `Downloaded "${chalk.bold ( src )}"` );
+      const content = await response.text ();
+
+      fs.writeFileSync ( dst, content );
+
+      console.log ( `Downloaded "${color.bold ( src )}"` );
 
       return true;
 
@@ -215,7 +217,7 @@ class IconFontBuildr {
 
     copy ( src, dst );
 
-    console.log ( `Copied "${chalk.bold ( src )}"` );
+    console.log ( `Copied "${color.bold ( src )}"` );
 
     return true;
 
@@ -382,26 +384,26 @@ class IconFontBuildr {
 
   async buildFontTTF () {
 
-    return await execa ( 'npx', ['svg2ttf', this.paths.cache.fontSVG, this.paths.cache.fontTTF] );
+    spawnSync ( 'npx', ['svg2ttf', this.paths.cache.fontSVG, this.paths.cache.fontTTF] );
 
   }
 
   async buildFontEOT () {
 
-    return await execa ( 'npx', ['ttf2eot', this.paths.cache.fontTTF, this.paths.cache.fontEOT] );
+    spawnSync ( 'npx', ['ttf2eot', this.paths.cache.fontTTF, this.paths.cache.fontEOT] );
 
   }
 
   async buildFontWOFF () {
 
-    return await execa ( 'npx', ['ttf2woff', this.paths.cache.fontTTF, this.paths.cache.fontWOFF] );
+    spawnSync ( 'npx', ['ttf2woff', this.paths.cache.fontTTF, this.paths.cache.fontWOFF] );
 
   }
 
   async buildFontWOFF2 () {
 
     const ttf = fs.readFileSync ( this.paths.cache.fontTTF ),
-          woff2 = ttf2woff2 ( ttf );
+          woff2 = await ttf2woff2.compress ( ttf );
 
     fs.writeFileSync ( this.paths.cache.fontWOFF2, woff2 );
 

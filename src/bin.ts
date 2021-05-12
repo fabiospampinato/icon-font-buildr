@@ -2,35 +2,23 @@
 
 /* IMPORT */
 
-import * as caporal from 'caporal';
-import * as minimist from 'minimist';
-import * as readPkg from 'read-pkg-up';
-import * as rdf from 'require-dot-file';
-import * as updateNotifier from 'update-notifier';
+import rdf from 'require-dot-file';
+import {program, updater} from 'specialist';
+import {description, name, version} from '../package.json';
 import IconFontBuildr from '.';
 
-/* CLI */
+/* MAIN */
 
-async function CLI () {
+updater ({ name, version });
 
-  const {pkg} = await readPkg ({ cwd: __dirname });
+program
+  .name ( name )
+  .version ( version )
+  .description ( description )
+  .option ( '-c, --config <path>', 'Path to the config file' )
+  .action ( options => {
+    const config = ( options.config && require ( options.config ) ) || rdf ( 'icon_font.json', process.cwd () ) || {};
+    new IconFontBuildr ( config ).build ();
+  });
 
-  updateNotifier ({ pkg }).notify ();
-
-  caporal
-    .version ( pkg.version )
-    .option ( '--config <path>', 'Path to the config file' )
-    .action ( () => {
-
-      const argv = minimist ( process.argv.slice ( 2 ) ),
-            config = ( argv.config && require ( argv.config ) ) || rdf ( 'icon_font.json', process.cwd () ) || {};
-
-      new IconFontBuildr ( config ).build ();
-
-    });
-
-  caporal.parse ( process.argv );
-
-}
-
-CLI ();
+program.parse ();

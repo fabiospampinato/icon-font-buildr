@@ -2,11 +2,10 @@
 /* IMPORT */
 
 import {describe} from 'ava-spec';
-import * as del from 'del';
 import * as fs from 'fs';
 import * as path from 'path';
 import testURL from 'test-url';
-import IconFontBuildr from '../dist';
+import IconFontBuildr from '../dist/src';
 
 /* ICON FONT BUILDER */
 
@@ -52,8 +51,8 @@ describe ( 'Icon Font Buildr', it => {
 
     await testURL ( `file://${encodeURI ( __dirname )}/index.html` );
 
-    del.sync ( builder.config.output.icons );
-    del.sync ( builder.config.output.fonts );
+    fs.rmdirSync ( builder.config.output.icons, { recursive: true } );
+    fs.rmdirSync ( builder.config.output.fonts, { recursive: true } );
 
   });
 

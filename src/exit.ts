@@ -1,13 +1,13 @@
 
 /* IMPORT */
 
-import chalk from 'chalk';
+import {color} from 'specialist';
 
 /* EXIT */
 
 function exit ( message, code = 1 ) {
 
-  console.log ( chalk.red ( message ) );
+  console.log ( color.red ( message ) );
 
   process.exit ( code );
 

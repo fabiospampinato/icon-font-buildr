@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import isString = require ( 'lodash/isString' );
-import * as isUrl from 'is-url';
+import isUrl from 'is-url';
 import * as path from 'path';
 
 /* MAKE ABS */
