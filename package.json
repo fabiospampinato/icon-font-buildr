@@ -2,7 +2,7 @@
   "name": "icon-font-buildr",
   "repository": "github:fabiospampinato/icon-font-buildr",
   "description": "Build custom icon fonts, it supports remote and local icons sources.",
-  "version": "1.4.2",
+  "version": "2.0.0",
   "type": "module",
   "main": "dist/index.js",
   "exports": "./dist/index.js",
