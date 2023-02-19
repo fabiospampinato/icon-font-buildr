@@ -3,22 +3,20 @@
 /* IMPORT */
 
 import findUp from 'find-up-json';
-import {program, updater} from 'specialist';
-import {description, name, version} from '../package.json';
+import fs from 'node:fs';
+import {bin} from 'specialist';
 import IconFontBuildr from '.';
 
 /* MAIN */
 
-updater ({ name, version });
-
-program
-  .name ( name )
-  .version ( version )
-  .description ( description )
+bin ( 'icon-font-buildr', 'Build custom icon fonts' )
+  /* DEFAULT COMMAND */
   .option ( '-c, --config <path>', 'Path to the config file' )
   .action ( options => {
-    const config = ( options.config && require ( options.config ) ) || findUp ( 'icon_font.json', process.cwd () )?.content || {};
-    new IconFontBuildr ( config ).build ();
-  });
-
-program.parse ();
+    const configPath = options['config'];
+    const config = configPath ? JSON.parse ( fs.readFileSync ( configPath, 'utf8' ) ) : findUp ( 'icon_font.json' )?.content || {};
+    const buildr = new IconFontBuildr ( config );
+    return buildr.build ();
+  })
+  /* RUN */
+  .run ();

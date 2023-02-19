@@ -1,39 +1,19 @@
 {
   "name": "icon-font-buildr",
+  "repository": "github:fabiospampinato/icon-font-buildr",
   "description": "Build custom icon fonts, it supports remote and local icons sources.",
   "version": "1.4.2",
-  "main": "dist/src/index.js",
-  "bin": "dist/src/bin.js",
-  "types": "dist/src/index.d.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": "./dist/index.js",
+  "bin": "dist/bin.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "clean:dist": "rimraf dist",
-    "clean:coverage": "rimraf coverage .nyc_output",
-    "clean": "npm run clean:dist && npm run clean:coverage",
-    "compile": "tsc --skipLibCheck && tstei",
-    "compile:watch": "tsc --skipLibCheck --watch",
-    "test": "ava",
-    "test:watch": "ava --watch",
-    "coverage": "nyc --reporter=html ava",
-    "report": "nyc report",
-    "report:html": "open coverage/index.html",
-    "prepublishOnly": "npm run clean && npm run compile && npm run coverage"
-  },
-  "ava": {
-    "files": [
-      "test/index.js"
-    ]
-  },
-  "bugs": {
-    "url": "https://github.com/fabiospampinato/icon-font-buildr/issues"
-  },
-  "license": "MIT",
-  "author": {
-    "name": "Fabio Spampinato",
-    "email": "spampinabio@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fabiospampinato/icon-font-buildr.git"
+    "clean": "tsex clean",
+    "compile": "tsex compile",
+    "compile:watch": "tsex compile --watch",
+    "test": "node test/index.js",
+    "prepublishOnly": "npm run clean && npm run compile && npm run test"
   },
   "keywords": [
     "font",
@@ -42,33 +22,23 @@
     "generator",
     "cli"
   ],
-  "engines": {
-    "node": ">=12.12.0"
-  },
   "dependencies": {
-    "find-up-json": "^1.0.0",
-    "is-url": "^1.2.4",
-    "lodash": "^4.17.21",
-    "node-fetch": "^2.6.1",
-    "specialist": "0.3.0",
-    "svg2ttf": "^5.2.0",
-    "svgicons2svgfont": "^10.0.1",
-    "temp": "^0.9.4",
-    "ttf2eot": "^2.0.0",
-    "ttf2woff": "^2.0.2",
-    "wawoff2": "^2.0.0"
+    "find-up-json": "^2.0.1",
+    "plain-object-merge": "^2.0.0",
+    "specialist": "1.1.0",
+    "svg2ttf": "^6.0.3",
+    "svgicons2svgfont": "^12.0.0",
+    "ttf2eot": "^3.1.0",
+    "ttf2woff": "^3.0.0",
+    "wawoff2": "^2.0.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.169",
-    "@types/node": "^15.0.2",
-    "ava": "^0.18.2",
-    "ava-spec": "^1.1.1",
-    "esbuild": "^0.11.20",
-    "nyc": "^10.3.2",
-    "puppeteer": "^2.1.1",
-    "rimraf": "^3.0.2",
-    "test-url": "^1.0.0",
-    "typescript": "~4.2.4",
-    "typescript-transform-export-interop": "^1.0.4"
+    "@types/node": "^18.14.0",
+    "@types/svgicons2svgfont": "^10.0.1",
+    "@types/wawoff2": "^1.0.0",
+    "fava": "^0.2.0",
+    "prompts-helpers": "^2.0.0",
+    "tsex": "^2.2.0",
+    "typescript": "^4.9.5"
   }
 }

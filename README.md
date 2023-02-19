@@ -25,53 +25,47 @@ icon-font-buildr # The `--config` option can be omitted if your configuration fi
 #### API
 
 ```js
-const path = require ( 'path' );
-const IconFontBuildr = require ( 'icon-font-buildr' );
+import path from 'node:path';
+import IconFontBuildr from 'icon-font-buildr';
 
-async function build () {
-
-  const builder = new IconFontBuildr ({
-    sources: [ // Where to get the icons, both remote and local sources are supported. `[icon]` will be replace with the name of your icon
-      path.join ( __dirname, 'icons', '[icon].svg' ),
-      'https://fonts.gstatic.com/s/i/materialicons/[icon]/v5/24px.svg',
-      'https://fonts.gstatic.com/s/i/materialicons/[icon]/v4/24px.svg',
-      'https://fonts.gstatic.com/s/i/materialicons/[icon]/v3/24px.svg',
-      'https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/[icon].svg'
-    ],
-    icons: [ // Icons to use/download
-      'backup',
-      'bug_report',
-      'amazon',
-      { // Advanced way to define an icon
-        icon: 'android-debug-bridge',
-        name: 'android debug icon', // Custom icon name
-        codepoints: ['\ue042', '\ue064'], // Custom codepoints
-        ligatures: ['debug', 'debug_alt'] // Custom ligatures
-      }
-    ],
-    output: {
-      // codepoints: true, // Enable support for codepoints
-      // ligatures: false, // Disable support for ligatures
-      // icons: path.join ( __dirname, 'builder-icons' ), // Where to save the icons, if not provided they won't be stored permanently
-      fonts: path.join ( __dirname, 'builder-fonts' ), // Where to save the fonts
-      fontName: 'MaterialDesign', // The name of the font to generate
-      formats: [ // Font formats to output
-        'eot',
-        'ttf',
-        'woff',
-        'woff2'
-      ]
+const builder = new IconFontBuildr ({
+  sources: [ // Where to get the icons, both remote and local sources are supported. `[icon]` will be replace with the name of your icon
+    path.join ( __dirname, 'icons', '[icon].svg' ),
+    'https://fonts.gstatic.com/s/i/materialicons/[icon]/v5/24px.svg',
+    'https://fonts.gstatic.com/s/i/materialicons/[icon]/v4/24px.svg',
+    'https://fonts.gstatic.com/s/i/materialicons/[icon]/v3/24px.svg',
+    'https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/[icon].svg'
+  ],
+  icons: [ // Icons to use/download
+    'backup',
+    'bug_report',
+    'amazon',
+    { // Advanced way to define an icon
+      icon: 'android-debug-bridge',
+      name: 'android debug icon', // Custom icon name
+      codepoints: ['\ue042', '\ue064'], // Custom codepoints
+      ligatures: ['debug', 'debug_alt'] // Custom ligatures
     }
-  });
+  ],
+  output: {
+    // codepoints: true, // Enable support for codepoints
+    // ligatures: false, // Disable support for ligatures
+    // icons: path.join ( __dirname, 'builder-icons' ), // Where to save the icons, if not provided they won't be stored permanently
+    fonts: path.join ( __dirname, 'builder-fonts' ), // Where to save the fonts
+    fontName: 'MaterialDesign', // The name of the font to generate
+    formats: [ // Font formats to output
+      'eot',
+      'ttf',
+      'woff',
+      'woff2'
+    ]
+  }
+});
 
-  await builder.build ();
+await builder.build ();
 
-  const codepoints = builder.getIconsCodepoints (); // Get a map of icon names to codepoints, useful for generating HTML/CSS/SCSS etc.
-  const ligatures = builder.getIconsLigatures (); // Get a map of icon names to ligatures, useful for generating HTML/CSS/SCSS etc.
-
-}
-
-build ();
+const codepoints = builder.getIconsCodepoints (); // Get a map of icon names to codepoints, useful for generating HTML/CSS/SCSS etc.
+const ligatures = builder.getIconsLigatures (); // Get a map of icon names to ligatures, useful for generating HTML/CSS/SCSS etc.
 ```
 
 ## License
