@@ -5,7 +5,8 @@ import {assert} from 'fava';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import Prompts from 'prompts-helpers';
+import * as prask from 'prask';
+import open from 'tiny-open';
 import IconFontBuildr from '../dist/index.js';
 
 /* MAIN */
@@ -44,10 +45,14 @@ await builder.build ();
 assert.true ( fs.existsSync ( path.join ( builder.config.output.icons, 'public_domain.svg' ) ) );
 assert.true ( fs.existsSync ( path.join ( builder.config.output.fonts, 'IconFont.woff2' ) ) );
 
-console.log ( 'Check if the page looks alright, close it to continue...' );
-console.log ( `file://${encodeURI ( path.join ( process.cwd (), 'test' ) )}/index.html` );
+const url = `file://${encodeURI ( path.join ( process.cwd (), 'test' ) )}/index.html`;
 
-const result = await Prompts.yesNo ( 'Does it look alright?' );
+console.log ( 'Check if the page looks alright, close it to continue...' );
+console.log ( url );
+
+open ( url );
+
+const result = await prask.toggle ({ message: 'Does it look alright?', initial: false });
 
 assert.true ( result );
 

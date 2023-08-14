@@ -37,7 +37,8 @@
     "@types/svgicons2svgfont": "^10.0.1",
     "@types/wawoff2": "^1.0.0",
     "fava": "^0.2.0",
-    "prompts-helpers": "^2.0.0",
+    "prask": "^1.5.1",
+    "tiny-open": "^1.0.0",
     "tsex": "^2.2.0",
     "typescript": "^4.9.5"
   }
